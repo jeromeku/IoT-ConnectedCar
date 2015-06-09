@@ -60,8 +60,8 @@ def smear(journey):
             obs["latitude"] = origin_lat
         else:
             # Smear GPS coordinates
-            obs["longitude"] = float(obs["longitude"]) + np.random.uniform(-0.002, sd_long*0.002)
-            obs["latitude"] = float(obs["latitude"]) + np.random.uniform(-0.002, sd_lat*0.002)
+            obs["longitude"] = str(float(obs["longitude"]) + np.random.uniform(-0.002, sd_long*0.002))
+            obs["latitude"] = str(float(obs["latitude"]) + np.random.uniform(-0.002, sd_lat*0.002))
 
         # Add or subtract random number of days and minutes from timestamp
         obs["timestamp"] = op(pd.to_datetime(obs["timestamp"], unit="ms"), np.timedelta64(minutes, "m")) - np.timedelta64(days, "D")

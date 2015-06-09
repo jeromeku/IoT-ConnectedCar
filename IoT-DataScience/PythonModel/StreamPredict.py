@@ -84,17 +84,6 @@ def callback(body):
         output = json.loads(body)
         vin = output["vin"]
 
-        # impute maf if missing
-        if output["maf_airflow"] == "":
-            # engine displacement in l
-            ed = 1.8
-            # volumetric efficiency
-            ve = 0.9
-            imap = output["rpm"] * output["intake_manifold_pressure"] / (output["intake_air_temp"] + 273.15)
-            # 28.97 = mass of air
-            # 8.314 = gas constant
-            output["maf_airflow"] = (imap/120.) * ve * ed * (28.97/8.314)
-
         # impute fuel level if missing
         if output["fuel_level_input"] == "":  # TODO: take last value if it exists
             output["fuel_level_input"] = 50
@@ -156,7 +145,24 @@ def callback(body):
         predictions["RemainingRange"] = remaining_range
 
         output["Predictions"] = predictions
-        output["mpg_instantaneous"] = journey.data.MPG_from_MAF.tail(1).values[0]
+
+	# impute maf if missing
+	if output["maf_airflow"] == "":
+	    # engine displacement in l
+	    ed = 1.8
+	    # volumetric efficiency
+	    ve = 0.9
+	    imap = output["rpm"] * output["intake_manifold_pressure"] / (output["intake_air_temp"] + 273.15)
+	    # 28.97 = mass of air
+	    # 8.314 = gas constant
+	    output[u"maf_airflow"] = (imap/120.) * ve * ed * (28.97/8.314)
+	    if output[u"maf_airflow"] == 0:
+		output["mpg_instantaneous"] = 0
+	    else:
+		output["mpg_instantaneous"] = 7.718 * float(output["vehicle_speed"])/float(output["maf_airflow"])
+	else:
+	    output["mpg_instantaneous"] = journey.data.MPG_from_MAF.tail(1).values[0]
+
         if (units == "miles"):
             output["vehicle_speed"] = int(output["vehicle_speed"] * 0.621371)
 

@@ -54,8 +54,7 @@ online_class_file = config.get("Batch", "online_class_file")
 journey_cluster_file = config.get("Batch", "journey_cluster_file")
 
 logfile = config.get("Directories", "logfile")
-
-logging.basicConfig(filename=logfile, level=logging.ERROR)
+logging.basicConfig(filename=logfile, level=logging.INFO)
 
 # Load models
 init_class_models = joblib.load(storedmodel_directory + init_class_file)

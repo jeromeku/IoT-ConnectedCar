@@ -126,12 +126,12 @@ def callback(body):
 
         # calculate remaining range
         mpg = np.nansum(smoothed_probabilities * mpg_insts[vin])
-        remaining_fuel_gallons = ((np.array(journey.data.FuelRemaining.tail(1), dtype="float64")/100 * float(fuel_capacity)) * 0.264172052)[0]
+        remaining_fuel_gallons = (output["fuel_level_input"]/100. * float(fuel_capacity)) * 0.264172052
 
         if (units == "miles"):
             remaining_range = int(remaining_fuel_gallons * mpg)
         else:
-            remaining_range = (remaining_fuel_gallons * mpg) * 1.609344
+            remaining_range = int((remaining_fuel_gallons * mpg) * 1.609344)
 
         # create cluster information
         container = zip(cluster_ids[vin], smoothed_probabilities[0], end_locations[vin], mpg_insts[vin])
@@ -146,22 +146,22 @@ def callback(body):
 
         output["Predictions"] = predictions
 
-	# impute maf if missing
-	if output["maf_airflow"] == "":
-	    # engine displacement in l
-	    ed = 1.8
-	    # volumetric efficiency
-	    ve = 0.9
-	    imap = output["rpm"] * output["intake_manifold_pressure"] / (output["intake_air_temp"] + 273.15)
-	    # 28.97 = mass of air
-	    # 8.314 = gas constant
-	    output[u"maf_airflow"] = (imap/120.) * ve * ed * (28.97/8.314)
-	    if output[u"maf_airflow"] == 0:
-		output["mpg_instantaneous"] = 0
-	    else:
-		output["mpg_instantaneous"] = 7.718 * float(output["vehicle_speed"])/float(output["maf_airflow"])
-	else:
-	    output["mpg_instantaneous"] = journey.data.MPG_from_MAF.tail(1).values[0]
+        # impute maf if missing
+        if output["maf_airflow"] == "":
+            # engine displacement in l
+            ed = 1.8
+            # volumetric efficiency
+            ve = 0.9
+            imap = output["rpm"] * output["intake_manifold_pressure"] / (output["intake_air_temp"] + 273.15)
+            # 28.97 = mass of air
+            # 8.314 = gas constant
+            output[u"maf_airflow"] = (imap/120.) * ve * ed * (28.97/8.314)
+            if output[u"maf_airflow"] == 0:
+                output["mpg_instantaneous"] = 0
+            else:
+                output["mpg_instantaneous"] = 7.718 * float(output["vehicle_speed"])/float(output["maf_airflow"])
+        else:
+            output["mpg_instantaneous"] = journey.data.MPG_from_MAF.tail(1).values[0]
 
         if (units == "miles"):
             output["vehicle_speed"] = int(output["vehicle_speed"] * 0.621371)

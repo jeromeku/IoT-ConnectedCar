@@ -36,6 +36,8 @@ for filename in filenames:
             # 28.97 = mass of air
             # 8.314 = gas constant
             trip[i]['maf_airflow'] = (imap/120.) * ve * ed * (28.97/8.314)
+            if trip[i]['maf_airflow'] == "0.0":
+                trip[i]['maf_airflow'] = str(0.01)
 
     new_filename = target_dir + filename.split('/')[-1]
     jlist = [json.dumps(record) + "\n" for record in trip]
